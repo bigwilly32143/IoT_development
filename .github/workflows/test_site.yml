@@ -1,9 +1,9 @@
 name: Test Deployed Website
 
 on:
-  workflow_dispatch:       # allows manual run
+  workflow_dispatch:
   schedule:
-    - cron: '0 * * * *'   # optional, runs every hour
+    - cron: '0 * * * *'
 
 jobs:
   test-site:
@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Test homepage accessibility
         run: |
-          STATUS=$(curl -o /dev/null -s -w "%{http_code}\n" https://willmatth.github.io/IoT_development/)
+          STATUS=$(curl -L -o /dev/null -s -w "%{http_code}\n" https://willmatth.github.io/IoT_development/)
           if [ "$STATUS" -ne 200 ]; then
             echo "Website is down! Status: $STATUS"
             exit 1
@@ -19,12 +19,38 @@ jobs:
             echo "Website is up! Status: $STATUS"
           fi
 
-      - name: Check homepage contains key text
+      - name: Check key headings
         run: |
-          curl -s https://willmatth.github.io/IoT_development/ | grep -q "Futuristic IoT Project"
+          curl -s https://willmatth.github.io/IoT_development/ | grep -iq "Futuristic IoT Project"
           if [ $? -ne 0 ]; then
-            echo "Key text missing!"
+            echo "Main heading missing!"
             exit 1
-          else
-            echo "Key text found — homepage looks good."
           fi
+          curl -s https://willmatth.github.io/IoT_development/ | grep -iq "Project Overview"
+          if [ $? -ne 0 ]; then
+            echo "Project Overview section missing!"
+            exit 1
+          fi
+          echo "Headings verified."
+
+      - name: Check key images exist
+        run: |
+          for img in images/agile-board.jpg images/iot-device1.jpg images/iot-device2.jpg; do
+            STATUS=$(curl -L -o /dev/null -s -w "%{http_code}\n" https://willmatth.github.io/IoT_development/$img)
+            if [ "$STATUS" -ne 200 ]; then
+              echo "$img not found!"
+              exit 1
+            fi
+          done
+          echo "Images exist."
+
+      - name: Check key videos exist
+        run: |
+          for vid in videos/demo1.mp4 videos/demo2.mp4; do
+            STATUS=$(curl -L -o /dev/null -s -w "%{http_code}\n" https://willmatth.github.io/IoT_development/$vid)
+            if [ "$STATUS" -ne 200 ]; then
+              echo "$vid not found!"
+              exit 1
+            fi
+          done
+          echo "Videos exist."
