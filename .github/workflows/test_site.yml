@@ -1,9 +1,9 @@
 name: Test Deployed Website
 
 on:
-  schedule:
-    - cron: '0 * * * *'  # runs every hour
   workflow_dispatch:       # allows manual run
+  schedule:
+    - cron: '0 * * * *'   # optional, runs every hour
 
 jobs:
   test-site:
@@ -19,12 +19,12 @@ jobs:
             echo "Website is up! Status: $STATUS"
           fi
 
-      - name: Check key page exists
+      - name: Check homepage contains key text
         run: |
-          curl -s https://willmatth.github.io/IoT_development/about.html | grep -q "About Our IoT Project"
+          curl -s https://willmatth.github.io/IoT_development/ | grep -q "Futuristic IoT Project"
           if [ $? -ne 0 ]; then
-            echo "About page missing or incorrect!"
+            echo "Key text missing!"
             exit 1
           else
-            echo "About page exists and is correct."
+            echo "Key text found — homepage looks good."
           fi
